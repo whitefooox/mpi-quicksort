@@ -138,6 +138,26 @@ int main(int argc, char *argv[])
     // сортировка на каждом процессе
     quicksort(chunk, 0, ownChunkSize - 1);
 
+    int step = 1;
+    while(step < size){
+        if(rank % (2 * step) == 0){
+            if(rank + step < size){
+                int receivedChunkSize;
+                MPI_Recv(&receivedChunkSize, 1, MPI_INT, rank + step, 0, MPI_COMM_WORLD, &status);
+                int* chunkReceived = (int *)malloc(receivedChunkSize * sizeof(int));
+                MPI_Recv(chunkReceived, receivedChunkSize, MPI_INT, rank + step, 0, MPI_COMM_WORLD, &status);
+                chunk = merge(chunk, chunkSize, chunkReceived, receivedChunkSize);
+                chunkSize += receivedChunkSize;
+            }
+        } else {
+            int near = rank - step;
+            MPI_Send(&ownChunkSize, 1, MPI_INT, near, 0, MPI_COMM_WORLD);
+            MPI_Send(chunk, ownChunkSize, MPI_INT, near, 0, MPI_COMM_WORLD);
+            break;
+        }
+        step *= 2;
+    }
+    /*
     for (int step = 1; step < size; step = 2 * step)
     {
         if (rank % (2 * step) != 0)
@@ -166,6 +186,7 @@ int main(int argc, char *argv[])
             ownChunkSize = ownChunkSize + receivedChunkSize;
         }
     }
+    */
 
     // останавливаем время
     time += MPI_Wtime();
