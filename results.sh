@@ -6,6 +6,7 @@ do
     ./quicksort.out $n >> ./results.txt
     mpiexec -n 2 ./quicksort-mpi.out $n >> ./results.txt
     mpiexec -n 4 ./quicksort-mpi.out $n >> ./results.txt
+    mpiexec -n 8 ./quicksort-mpi.out $n >> ./results.txt
 done
 
 rm ./quicksort.out
